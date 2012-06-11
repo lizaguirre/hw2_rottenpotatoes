@@ -7,7 +7,13 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.find :all, :order => params[:order]
+    @all_ratings = Movie.ratings
+    @ratings_checked = params[:ratings].respond_to?(:keys)? Hash[params[:ratings].keys.map {|x| [x, nil]}] : Hash.new
+    if params[:ratings].respond_to?(:keys)
+       @movies = Movie.find_all_by_rating(params[:ratings].keys, :order => params[:order])
+    else
+       @movies = Movie.find :all, :order => params[:order]
+    end
   end
 
   def new
