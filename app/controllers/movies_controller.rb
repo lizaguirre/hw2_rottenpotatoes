@@ -8,11 +8,36 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.ratings
-    @ratings_checked = params[:ratings].respond_to?(:keys)? Hash[params[:ratings].keys.map {|x| [x, nil]}] : Hash.new
-    if params[:ratings].respond_to?(:keys)
-       @movies = Movie.find_all_by_rating(params[:ratings].keys, :order => params[:order])
+
+    
+    if (params[:ratings] != nil)
+       session[:ratings] = Hash[params[:ratings].keys.map {|x| [x, nil]}]
+    else
+       session[:ratings] = session[:ratings].keys.length > 0 ? session[:ratings] : Hash[@all_ratings.map {|x| [x, nil]}]
+       redirect = true
+    end
+
+    if (params[:order] != nil)
+       session[:order] = params[:order]
+    else
+       session[:order] = session[:order].length > 0 ? session[:order] : [:noorder]
+       redirect = true
+    end
+
+    if (redirect == true)
+       flash.keep
+       redirect_to movies_path({ :order => session[:order], :ratings => session[:ratings] })
+    else
+    
+    @ratings_checked = session[:ratings]
+    if params[:order] == ["noorder"]
+       params[:order]=[]
+    end
+    if session[:ratings].length > 0
+       @movies = Movie.find_all_by_rating(session[:ratings].keys, :order => params[:order])
     else
        @movies = Movie.find :all, :order => params[:order]
+    end
     end
   end
 
