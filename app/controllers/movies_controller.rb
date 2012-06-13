@@ -8,19 +8,19 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.ratings
+    debugger    
 
-    
     if (params[:ratings] != nil)
        session[:ratings] = Hash[params[:ratings].keys.map {|x| [x, nil]}]
     else
-       session[:ratings] = session[:ratings].keys.length > 0 ? session[:ratings] : Hash[@all_ratings.map {|x| [x, nil]}]
+       session[:ratings] = (session[:ratings] != nil && session[:ratings].keys.length > 0) ? session[:ratings] : Hash[@all_ratings.map {|x| [x, nil]}]
        redirect = true
     end
 
     if (params[:order] != nil)
        session[:order] = params[:order]
     else
-       session[:order] = session[:order].length > 0 ? session[:order] : [:noorder]
+       session[:order] = (session[:order] != nil && session[:order].length > 0) ? session[:order] : [:noorder]
        redirect = true
     end
 
@@ -30,13 +30,14 @@ class MoviesController < ApplicationController
     else
     
     @ratings_checked = session[:ratings]
-    if params[:order] == ["noorder"]
-       params[:order]=[]
+    order = params[:order]
+    if order == ["noorder"]
+       order=[]
     end
     if session[:ratings].length > 0
-       @movies = Movie.find_all_by_rating(session[:ratings].keys, :order => params[:order])
+       @movies = Movie.find_all_by_rating(session[:ratings].keys, :order => order)
     else
-       @movies = Movie.find :all, :order => params[:order]
+       @movies = Movie.find :all, :order => order
     end
     end
   end
